@@ -1,0 +1,46 @@
+on: [push, workflow_dispatch]
+
+jobs:
+  vulnerability_check_job:
+    runs-on: ubuntu-latest
+    name: A job that analyzes the firmware for vulnerabilities and suggests mitigations
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: sudo apt update; sudo apt install -y python3-tables python3-pandas python3-prctl python3-json5 python3-protobuf python3-tqdm gcc-riscv64-linux-gnu libglib2.0-dev libfdt-dev libpixman-1-dev zlib1g-dev libprotobuf-c-dev protobuf-compiler protobuf-c-compiler; pip install protobuf==4.21.12
+
+      - name: Clone Repository
+        uses: actions/checkout@v2
+
+      - name: Build firmware
+        run: make; riscv64-linux-gnu-objdump -D minimal.elf
+
+      - name: Get latest ARCHIE commit hash
+        id: get-commit-id
+        run: echo -n 'COMMIT_ID=' >> "$GITHUB_OUTPUT"; git ls-remote https://github.com/Fraunhofer-AISEC/archie.git HEAD >> "$GITHUB_OUTPUT"
+
+      - name: Cache ARCHIE
+        id: cache-archie
+        uses: actions/cache@v3
+        with:
+          key: ${{ steps.get-commit-id.outputs.COMMIT_ID }}
+          path: archie
+
+      - if: ${{ steps.cache-archie.outputs.cache-hit != 'true' }}
+        name: Build Archie
+        uses: ./.github/workflows/actions/build-archie-action
+
+      - name: Run ARCHIE
+        continue-on-error: true
+        run: python3 archie/controller.py --fault .github/workflows/actions/build-archie-action/archie-configs/fault.json --qemu .github/workflows/actions/build-archie-action/archie-configs/qemuconf.json output.hdf5 --debug --disable-ring-buffer
+
+      - name: Upload Log File Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: workspace_artifacts
+          path: |
+            log*
+            minimal.elf
+            output.hdf5

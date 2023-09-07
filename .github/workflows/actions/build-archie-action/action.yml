@@ -1,0 +1,11 @@
+name: 'Build ARCHIE'
+description: 'Downloads and Buils the newest version of ARCHIE'
+runs:
+  using: 'composite'
+  steps:
+    - run: sudo apt install -y build-essential ninja-build 
+      shell: bash
+    - run: git clone https://github.com/Fraunhofer-AISEC/archie.git archie
+      shell: bash
+    - run: cd archie; git submodule update --init; mkdir -p qemu/build/debug; cd qemu/build/debug;  ./../../configure --target-list=riscv64-softmmu --enable-debug --enable-plugins --disable-sdl --disable-gtk --disable-curses --disable-vnc; make -j $(nproc --all); cd ../../../faultplugin; make -j
+      shell: bash

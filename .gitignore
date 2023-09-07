@@ -1,0 +1,4 @@
+log*.txt
+bkup_goldenrun_results.xz
+*.elf
+*.o
