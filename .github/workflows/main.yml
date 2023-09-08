@@ -11,9 +11,6 @@ jobs:
       - name: Install dependencies
         run: sudo apt update; sudo apt install -y python3-tables python3-pandas python3-prctl python3-json5 python3-protobuf python3-tqdm gcc-riscv64-linux-gnu libglib2.0-dev libfdt-dev libpixman-1-dev zlib1g-dev libprotobuf-c-dev protobuf-compiler protobuf-c-compiler; pip install protobuf==4.21.12
 
-      - name: Clone Repository
-        uses: actions/checkout@v2
-
       - name: Build firmware
         run: make; riscv64-linux-gnu-objdump -D minimal.elf
 
@@ -44,3 +41,11 @@ jobs:
             log*
             minimal.elf
             output.hdf5
+
+      - name: Analyze Faults
+        uses: ./.github/workflows/actions/analyze-faults-action
+        with:
+          binary: 'minimal.elf'
+          hdf: 'output.hdf5'
+          success_address: '0x80000030'
+

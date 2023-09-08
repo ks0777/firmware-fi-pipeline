@@ -6,11 +6,11 @@
 	},
 	"end" : [
 	    {
-		"address" : 0x8000020c,
+		"address" : 0x80000030,
 		"counter" : 1
 	    },
 	    {
-		"address" : 0x800001a8,
+		"address" : 0x80000020,
 		"counter" : 1
 	    }
 	],

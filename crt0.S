@@ -1,4 +1,4 @@
-.section .init, "ax"
+.section .text, "ax"
 .global _start
 
 _start:
@@ -13,9 +13,22 @@ _start:
 trap_vector:
     j _hang
 
+.type _hang STT_FUNC
+.global _hang
 _hang:
     j _hang
     j _hang
     j _hang
+    ret
+.size _hang, . - _hang
+
+.type _success STT_FUNC
+.global _success
+_success:
+    j _hang
+    j _hang
+    j _hang
+    ret
+.size _success, . - _success
 
 .end

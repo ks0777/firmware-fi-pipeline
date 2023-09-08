@@ -1,58 +1,59 @@
 #include<stdint.h>
 
-uint8_t test_condition(void) {
+void _hang(void);
+
+void _success(void);
+
+void test_condition(void) {
     uint8_t x = 212;
     if (x == 212) {
-	return 19;
+	return;
     } else {
-	return 123;
+	_success();
     }
 }
 
-uint8_t test_loop_integrity(void) {
-    int k = 0;
-    volatile int decoy = 0;
-    for (int i=0; i<3; i++) {
-	for (int j=0; j<3; j++) {
-	    k++;
-	    decoy = (decoy * 2 + 8) % 57;
-	} 
-	decoy = decoy * 3 + i;
+void test_loop_integrity(void) {
+    int i = 0;
+    int x = 0;
+    for (i=0; i<10; i++) {
+	x += i + 1;
     } 
 
-    return k;
+    // Fault successful if loop was terminated early
+    if (i < 9) {
+	_success();
+    }
+
+    // Fault successful if 5th round of loop was skipped
+    if (x == 50) {
+	_success();
+    }
 }
 
 void test_call_integrity_2(uint8_t *x) {
     *x = 1;
+    *x = 1;
+    *x = 1;
 }
 
-uint8_t test_call_integrity() {
-    uint8_t x = 0;
+void test_call_integrity() {
+    uint8_t x = 67;
 
     test_call_integrity_2(&x);
 
-    return x;
-}
-
-void error_handler(void) {
-    while(1) {
-	__asm__("nop");
+    // Fault successful if function call did not succeed;
+    if (x == 67) {
+	_success();
     }
 }
 
 int main(void) {
-    if (!test_call_integrity())
-	error_handler();
+    test_call_integrity();
 
-    if (test_loop_integrity() != 9)
-	error_handler();
+    test_loop_integrity();
 
-    if (test_condition() != 19)
-	error_handler();
+    test_condition();
 
-    while(1) {
-	__asm__("nop");
-    }
-
+    _hang();
 }
