@@ -6,10 +6,16 @@ void _success(void);
 
 void test_condition(void) {
     uint8_t x = 212;
-    if (x == 212) {
-	return;
+    if (__builtin_expect(x == 212, 1)) {
+	__asm("nop");
     } else {
 	_success();
+    }
+
+    if (__builtin_expect(x != 212, 0)) {
+	_success();
+    } else {
+	__asm("nop");
     }
 }
 
@@ -21,18 +27,17 @@ void test_loop_integrity(void) {
     } 
 
     // Fault successful if loop was terminated early
-    if (i < 9) {
+    if (i < 9 && i < 9) {
 	_success();
     }
 
     // Fault successful if 5th round of loop was skipped
-    if (x == 50) {
+    if (x == 50 && x == 50) {
 	_success();
     }
 }
 
 void test_call_integrity_2(uint8_t *x) {
-    *x = 1;
     *x = 1;
     *x = 1;
 }
@@ -43,7 +48,7 @@ void test_call_integrity() {
     test_call_integrity_2(&x);
 
     // Fault successful if function call did not succeed;
-    if (x == 67) {
+    if (x == 67 && x == 67) {
 	_success();
     }
 }
