@@ -4,6 +4,8 @@ jobs:
   vulnerability_check_job:
     runs-on: ubuntu-latest
     name: A job that analyzes the firmware for vulnerabilities and suggests mitigations
+    permissions:
+      security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
     steps:
       - name: Checkout
         uses: actions/checkout@v3
