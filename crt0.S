@@ -1,4 +1,4 @@
-.section .text, "ax"
+.section .init, "ax"
 .global _start
 
 _start:
@@ -10,25 +10,21 @@ _start:
     add s0, sp, zero
     jal zero, main
 
-trap_vector:
-    j _hang
-
 .type _hang STT_FUNC
 .global _hang
+trap_vector:
 _hang:
     j _hang
     j _hang
     j _hang
-    ret
 .size _hang, . - _hang
 
 .type _success STT_FUNC
 .global _success
 _success:
-    j _hang
-    j _hang
-    j _hang
-    ret
+    j _success
+    j _success
+    j _success
 .size _success, . - _success
 
 .end

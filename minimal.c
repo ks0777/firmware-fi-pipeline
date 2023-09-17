@@ -1,49 +1,60 @@
-#include<stdint.h>
-
 void _hang(void);
 
 void _success(void);
 
 void test_condition(void) {
-    uint8_t x = 212;
-    if (__builtin_expect(x == 212, 1)) {
+    volatile int x = 212;
+    // The compiler is smart enough to know that the check will likely succeed even though the variable is marked as volatile
+    // Consequently it will put the then block right behind the branch which is the secure configuration in our case
+    // For the sake of the exmaple we advise the compiler to place the call to _success right behind the branch
+    if (__builtin_expect(x == 212, 0)) {
 	__asm("nop");
     } else {
 	_success();
     }
 
-    if (__builtin_expect(x != 212, 0)) {
+    volatile int y = 0;
+
+    if (x == 212)
+	y = 109;
+    else
+	y = 37;
+
+    if (y == 37 && y == 37) {
 	_success();
-    } else {
-	__asm("nop");
     }
 }
 
 void test_loop_integrity(void) {
-    int i = 0;
-    int x = 0;
-    for (i=0; i<10; i++) {
+    volatile int i = 0;
+    volatile int x = 0;
+    for (i=0; i<3; i++) {
 	x += i + 1;
     } 
 
     // Fault successful if loop was terminated early
-    if (i < 9 && i < 9) {
+    if (i == 8 && i == 8) {
 	_success();
     }
 
-    // Fault successful if 5th round of loop was skipped
-    if (x == 50 && x == 50) {
+    // Fault successful if loop was skipped entirely
+    if (x == 0 && x == 0) {
+	_success();
+    }
+
+    // Fault successful if 2nd round of loop was skipped
+    if (x == 4 && x == 4) {
 	_success();
     }
 }
 
-void test_call_integrity_2(uint8_t *x) {
+void test_call_integrity_2(int *x) {
     *x = 1;
     *x = 1;
 }
 
 void test_call_integrity() {
-    uint8_t x = 67;
+    int x = 67;
 
     test_call_integrity_2(&x);
 

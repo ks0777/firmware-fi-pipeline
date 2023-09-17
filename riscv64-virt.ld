@@ -5,3 +5,14 @@ MEMORY
 ENTRY(_start)
 
 PROVIDE(__stack_top = ORIGIN(RAM) + LENGTH(RAM));
+
+SECTIONS {
+    . = ORIGIN(RAM);
+    .init : { *(.init) }
+
+    .text :
+    { 
+	KEEP(*(.note.gnu.build-id))
+	*(.text)
+    }
+}
