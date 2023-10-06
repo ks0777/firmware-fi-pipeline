@@ -20,7 +20,7 @@ runs:
       id: fault-finder
       shell: bash
       
-    - run: python3 fault_categorizer/fault_categorizer.py ${{ inputs.binary }} ${{ inputs.hdf }} -a ${{ steps.fault-finder.outputs.INSTRUCTION_ADDRESSES }} -c --accurate --output sarif > analysis.sarif
+    - run: python3 fault_categorizer/fault_categorizer.py ${{ inputs.binary }} ${{ inputs.hdf }} -a ${{ steps.fault-finder.outputs.INSTRUCTION_ADDRESSES }} --accurate -s ${{ inputs.success_address }} --output sarif > analysis.sarif
       shell: bash
 
     - name: Upload SARIF file
