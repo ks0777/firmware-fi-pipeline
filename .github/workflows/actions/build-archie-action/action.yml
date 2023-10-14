@@ -5,7 +5,7 @@ runs:
   steps:
     - run: sudo apt install -y build-essential ninja-build 
       shell: bash
-    - run: git clone https://github.com/Fraunhofer-AISEC/archie.git archie
+    - run: git clone https://github.com/ks0777/archie.git archie
       shell: bash
-    - run: cd archie; git submodule update --init; mkdir -p qemu/build/debug; cd qemu/build/debug;  ./../../configure --target-list=riscv64-softmmu --enable-debug --enable-plugins --disable-sdl --disable-gtk --disable-curses --disable-vnc; make -j $(nproc --all); cd ../../../faultplugin; make -j
+    - run: cd archie; git checkout faultplugin_single_step; git submodule update --init; mkdir -p qemu/build/debug; cd qemu/build/debug;  ./../../configure --target-list=riscv64-softmmu --enable-debug --enable-plugins --disable-sdl --disable-gtk --disable-curses --disable-vnc; make -j $(nproc --all); cd ../../../faultplugin; make -j
       shell: bash
