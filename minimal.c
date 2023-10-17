@@ -46,9 +46,14 @@ void test_condition(void) {
 void __attribute__((optimize("O1"))) test_loop_integrity(void) {
     volatile int i = 0;
     volatile int x = 0;
-    for (i=0; __builtin_expect(i<3, 0); i++) {
+    for (i=0; __builtin_expect(FIH_LT(i,3), 1);) {
 	x += i + 1;
-    } 
+	FIH_INC(i);
+    }
+
+    if(FIH_LT(i,3)) {
+	FIH_PANIC;
+    }
 
     // fault successful if loop was terminated early
     safe_eq(i, 1);
@@ -57,7 +62,8 @@ void __attribute__((optimize("O1"))) test_loop_integrity(void) {
     safe_eq(i, 4);
 
     // fault successful if loop is entered regardless of condition 
-    for (i=0; i!=0; i++) {
+    FIH_SET(i, 0);
+    for (; FIH_NOT_EQ(i,0); i++) {
 	_success();
     } 
 }
