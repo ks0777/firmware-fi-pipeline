@@ -26,20 +26,20 @@ void test_condition(void) {
     volatile int x = 212;
     x = 212;
 
-    if (x != 212) {
+    if (FIH_NOT_EQ(x, 212)) {
 	_success();
     } else {
 	__asm("nop");
     }
 
-    if (x == 471) {
+    if (FIH_EQ(x, 471)) {
 	_success();
     }
 
-    if (x == 212) {
-	__asm("nop");
-    } else {
+    if (FIH_NOT_EQ(x, 212)) {
 	_success();
+    } else {
+	__asm("nop");
     }
 }
 
