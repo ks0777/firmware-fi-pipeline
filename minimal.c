@@ -1,3 +1,5 @@
+#include "fih.h"
+
 void _hang(void);
 
 void _success(void);
@@ -60,9 +62,10 @@ void __attribute__((optimize("O1"))) test_loop_integrity(void) {
     } 
 }
 
-void test_call_integrity_sub(volatile int *x) {
+int __attribute__((optimize("O1"))) test_call_integrity_sub(volatile int *x) {
     *x = 1;
     *x = 1;
+    FIH_RET_2(FIH_SUCCESS);
 }
 
 void success_dummy_1(void) {
@@ -73,7 +76,8 @@ void success_dummy_1(void) {
 void __attribute__((optimize("O1"))) test_call_integrity() {
     volatile int x = 67;
 
-    test_call_integrity_sub(&x);
+    int ret;
+    FIH_CALL(test_call_integrity_sub, ret, &x);
 
     // Fault successful if function call did not succeed;
     safe_eq(x, 67);
@@ -81,13 +85,14 @@ void __attribute__((optimize("O1"))) test_call_integrity() {
 
 // Condition is always true. The construct is secured such that the Then part is always executed
 // Skipping the return in the middle of the function will trigger the success function.
-void __attribute__((optimize("O3"))) test_call_integrity_2(void) {
+int __attribute__((optimize("O3"))) test_call_integrity_2(void) {
     volatile int x = 289;
     volatile int y = 78;
     if (__builtin_expect(x == 289 || y == 78, 1)) {
-	return;
+	FIH_RET_2(FIH_SUCCESS)
     }
     _success();
+    return FIH_FAILURE;
 }
 
 // Optimzation will cause the last instruction of the function to be a jump
@@ -99,6 +104,8 @@ void __attribute__((optimize("Os"))) test_call_integrity_3(void) {
 	__asm("addw a5, a5, 0");
     }
 }
+
+FIH_FUNCTION_BARRIER
 
 void success_dummy_2(void) {
     // fault jump in preceding function to get here
@@ -143,8 +150,9 @@ void __attribute__((optimize("Os"))) test_misc(void) {
 
 
 int main(void) {
+    int ret;
     test_call_integrity();
-    test_call_integrity_2();
+    FIH_CALL(test_call_integrity_2, ret);
     test_call_integrity_3();
 
     test_loop_integrity();
