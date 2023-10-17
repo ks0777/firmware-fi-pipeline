@@ -120,21 +120,19 @@ void success_dummy_2(void) {
 
 
 int test_misc_sub(volatile int* x) {
-    volatile int y = 1;
-    // One more instruction store to make sure that register values are overwritten
     volatile int z = 2;
-    *x = y; 
+    FIH_SET(*x, 1);
     return 89;
 }
 
-void __attribute__((optimize("Os"))) test_misc(void) {
+void __attribute__((optimize("O3"))) test_misc(void) {
     volatile int x=3;
     if (__builtin_expect(x == 1, 0)) {
 	__asm("nop");
     } else {
 	__asm("addw a5, a5, 0");
     }
-    if (__builtin_expect(x != 2, 0)) {
+    if (__builtin_expect(FIH_NOT_EQ(x, 2), 1)) {
 	__asm("nop");
     } else {
 	_success();
