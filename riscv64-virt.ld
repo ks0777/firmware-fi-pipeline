@@ -15,4 +15,12 @@ SECTIONS {
 	KEEP(*(.note.gnu.build-id))
 	*(.text)
     }
+
+    . = ALIGN(16);
+    PROVIDE(__global_pointer = .);
+
+    .sbss : 
+    {
+	*(.sbss)
+    }
 }

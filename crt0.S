@@ -3,6 +3,7 @@
 
 _start:
     .option norelax
+    la gp, __global_pointer
     la t0, trap_vector
     csrw mtvec, t0
 
